@@ -26,7 +26,7 @@ class GUI:
 
         self.output_text = tk.Text(self.root, height=20, width=60)
         self.output_text.pack()
-        
+
 
 
 class GPT:

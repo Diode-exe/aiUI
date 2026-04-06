@@ -4,7 +4,6 @@ from threading import Thread
 import logging
 from transformers import OpenAIGPTTokenizer, OpenAIGPTLMHeadModel, TextIteratorStreamer
 
-# Muzzle the noisy library logs but keep yours at INFO
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("transformers").setLevel(logging.ERROR)
 
