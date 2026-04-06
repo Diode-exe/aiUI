@@ -3,6 +3,7 @@
 from threading import Thread
 import tkinter as tk
 from gpt1 import GPT1Streamer
+# from mode_chooser import Mode
 
 class GUI:
     """Simple GUI to interact with GPT-1 streaming output."""
@@ -25,6 +26,8 @@ class GUI:
 
         self.output_text = tk.Text(self.root, height=20, width=60)
         self.output_text.pack()
+        
+
 
 class GPT:
     """Class to manage GPT-1 streaming generation."""
@@ -42,4 +45,6 @@ class GPT:
 gui = GUI()
 gpt = GPT(gui)
 gui.generate_button.config(command=gpt.generate_text)
+# mode_choose = Mode(gui_ref=gui)
+# mode_choose.chooser()
 gui.root.mainloop()

@@ -67,7 +67,3 @@ class GPT1Streamer:
                 print(new_text, end="", flush=True)
 
         print("\n--- Generation Finished ---")
-
-# --- Execution ---
-# gpt1 = GPT1Streamer()
-# gpt1.run_gpt1_streamed("The man went to the store to buy")
