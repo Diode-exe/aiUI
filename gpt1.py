@@ -19,6 +19,17 @@ class GPT1Streamer:
         else:
             logging.info("No GUI, will print to console.")
 
+    def _append_gui_text(self, text):
+        """Safely append text to Tk widgets from any thread."""
+        if not self.gui:
+            return
+
+        def _append():
+            self.gui.output_text.insert("end", text)
+            self.gui.output_text.see("end")
+
+        self.gui.root.after(0, _append)
+
     def run_gpt1_streamed(self, prompt, max_length=250):
         """Run GPT-1 with streaming output."""
         inputs = self.tokenizer(prompt, return_tensors="pt")
@@ -45,13 +56,13 @@ class GPT1Streamer:
 
         # 4. Iterate over the streamer and print live
         if self.gui:
-            self.gui.output_text.insert(f"--- GPT-1 Output (Streaming) ---\n{prompt}")
+            self._append_gui_text(f"--- GPT-1 Output (Streaming) ---\n{prompt}")
         else:
             print(f"--- GPT-1 Output (Streaming) ---\n{prompt}", end="", flush=True)
 
         for new_text in streamer:
             if self.gui:
-                self.gui.output_text.insert(new_text)
+                self._append_gui_text(new_text)
             else:
                 print(new_text, end="", flush=True)
 

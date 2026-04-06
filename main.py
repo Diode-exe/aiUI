@@ -1,5 +1,6 @@
 """Main application to run the GPT-1 streaming GUI."""
 
+from threading import Thread
 import tkinter as tk
 from gpt1 import GPT1Streamer
 
@@ -36,8 +37,7 @@ class GPT:
         prompt = self.gui.prompt_entry.get()
         if prompt:
             self.gui.output_text.delete(1.0, tk.END)  # Clear previous output
-            self.gui.output_text.insert(tk.END, f"--- GPT-1 Output (Streaming) ---\n{prompt}")
-            self.gpt1.run_gpt1_streamed(prompt)
+            Thread(target=self.gpt1.run_gpt1_streamed, args=(prompt,), daemon=True).start()
 
 gui = GUI()
 gpt = GPT(gui)
