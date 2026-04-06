@@ -3,13 +3,14 @@
 from threading import Thread
 import tkinter as tk
 from gpt1 import GPT1Streamer
-# from mode_chooser import Mode
+from gpt2 import GPT2Streamer
+from mode_chooser import Mode
 
 class GUI:
-    """Simple GUI to interact with GPT-1 streaming output."""
+    """Simple GUI to interact with GPT streaming output."""
     def __init__(self):
         self.root = tk.Tk()
-        self.root.title("GPT-1 Streaming Output")
+        self.root.title("GPT Streaming Output")
         self.setup_widgets()
 
     def setup_widgets(self):
@@ -27,12 +28,11 @@ class GUI:
         self.output_text = tk.Text(self.root, height=20, width=60)
         self.output_text.pack()
 
-
-
 class GPT:
-    """Class to manage GPT-1 streaming generation."""
+    """Class to manage GPT streaming generation."""
     def __init__(self, gui_ref):
         self.gpt1 = GPT1Streamer(gui_ref=gui_ref)
+        self.gpt2 = GPT2Streamer(gui_ref=gui_ref)
         self.gui = gui_ref
 
     def generate_text(self):
@@ -43,8 +43,8 @@ class GPT:
             Thread(target=self.gpt1.run_gpt1_streamed, args=(prompt,), daemon=True).start()
 
 gui = GUI()
+mode_choose = Mode(gui_ref=gui)
+mode_choose.chooser()
 gpt = GPT(gui)
 gui.generate_button.config(command=gpt.generate_text)
-# mode_choose = Mode(gui_ref=gui)
-# mode_choose.chooser()
 gui.root.mainloop()
