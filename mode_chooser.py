@@ -9,7 +9,7 @@ class Mode:
     def __init__(self, gui_ref=None):
         self.mode_name = None
         self.gui_ref = gui_ref
-        self.chooser_window = tk.Tk()
+        self.chooser_window = tk.Toplevel(master=self.gui_ref.root)
         self.chooser_window.title("Select Generation Mode")
         self.var = tk.StringVar(value="GPT-1")  # Default selection
 
@@ -26,8 +26,7 @@ class Mode:
         btn_frame.pack(pady=8)
         tk.Button(btn_frame, text="OK", command=self.on_ok).pack(side="left", padx=6)
         tk.Button(btn_frame, text="Cancel", command=lambda: sys.exit(0)).pack(side="left", padx=6)
-
-        self.chooser_window.mainloop()
+        self.chooser_window.grab_set()
         return self.mode_name
 
     def on_ok(self):

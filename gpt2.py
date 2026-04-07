@@ -10,8 +10,9 @@ logging.getLogger("transformers").setLevel(logging.ERROR)
 class GPT2Streamer:
     """Class to run GPT-2 with streaming output."""
     def __init__(self, model_name="gpt2", gui_ref=None):
-        self.tokenizer = OpenAIGPTTokenizer.from_pretrained(model_name)
-        self.model = OpenAIGPTLMHeadModel.from_pretrained(model_name)
+        self.model_name = model_name
+        self.tokenizer = None
+        self.model = None
         self.gui = gui_ref
         if self.gui:
             logging.info("GUI working.")
@@ -31,6 +32,11 @@ class GPT2Streamer:
 
     def run_gpt2_streamed(self, prompt, max_length=250):
         """Run GPT-2 with streaming output."""
+        if not self.tokenizer or not self.model:
+            logging.info("Loading GPT-2 model and tokenizer...")
+            self.tokenizer = OpenAIGPTTokenizer.from_pretrained(self.model_name)
+            self.model = OpenAIGPTLMHeadModel.from_pretrained(self.model_name)
+
         inputs = self.tokenizer(prompt, return_tensors="pt")
 
         # 1. Initialize the streamer

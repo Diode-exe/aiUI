@@ -31,6 +31,7 @@ class GUI:
 class GPT:
     """Class to manage GPT streaming generation."""
     def __init__(self, gui_ref):
+        logging.info("Initializing GPT class...")
         self.gpt1 = GPT1Streamer(gui_ref=gui_ref)
         self.gpt2 = GPT2Streamer(gui_ref=gui_ref)
         self.gui = gui_ref
@@ -38,7 +39,9 @@ class GPT:
 
     def generate_text(self):
         """Generate text using GPT-1 and display it in the GUI."""
+        logging.info("Generate button clicked.")
         prompt = self.gui.prompt_entry.get()
+        logging.info("Prompt received: %s", prompt)
         if mode_chosen == "GPT-1":
             logging.info("Starting GPT-1 streaming generation.")
             self.gui.output_text.delete(1.0, tk.END)  # Clear previous output
@@ -53,6 +56,7 @@ class GPT:
             logging.warning("Mode %s not implemented yet.", mode_chosen)
             self.gui.output_text.delete(1.0, tk.END)
             self.gui.output_text.insert("end", f"Mode '{mode_chosen}' not implemented yet.")
+        logging.info("Generation process completed.")
 
 gui = GUI()
 
