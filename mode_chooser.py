@@ -3,7 +3,6 @@
 import tkinter as tk
 import sys
 
-
 class Mode:
     """Class to manage mode selection via a modal dialog."""
     def __init__(self, gui_ref=None):
@@ -21,18 +20,18 @@ class Mode:
             tk.Radiobutton(self.chooser_window, text=opt, variable=var,
                            value=opt).pack(anchor="w", padx=8, pady=2)
 
-
         btn_frame = tk.Frame(self.chooser_window)
         btn_frame.pack(pady=8)
         tk.Button(btn_frame, text="OK", command=self.on_ok).pack(side="left", padx=6)
         tk.Button(btn_frame, text="Cancel", command=lambda: sys.exit(0)).pack(side="left", padx=6)
         self.chooser_window.grab_set()
+        self.chooser_window.wait_window()
         return self.mode_name
 
     def on_ok(self):
         """Handle OK button click: save selection, close chooser, and reopen main window."""
         self.mode_name = self.var.get()
-        self.chooser_window.destroy()
+        self.chooser_window.quit()
         self.reappear()
         return self.mode_name
 
