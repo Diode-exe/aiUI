@@ -31,7 +31,7 @@ class Mode:
     def on_ok(self):
         """Handle OK button click: save selection, close chooser, and reopen main window."""
         self.mode_name = self.var.get()
-        self.chooser_window.quit()
+        self.chooser_window.destroy()
         self.reappear()
         return self.mode_name
 
