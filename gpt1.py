@@ -66,7 +66,9 @@ class GPT1Streamer:
             do_sample=True,
             top_k=50,
             top_p=0.95,
-            no_repeat_ngram_size=2
+            no_repeat_ngram_size=2,
+            use_cache=False,        # Disable caching
+            past_key_values=None    # model gets confused without this
         )
 
         # 3. Start generation in a separate thread
