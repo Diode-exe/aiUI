@@ -1,8 +1,9 @@
 """Run GPT-2 with streaming output using Hugging Face Transformers."""
 
 from threading import Thread
+import os
 import logging
-from transformers import OpenAIGPTTokenizer, OpenAIGPTLMHeadModel, TextIteratorStreamer
+from transformers import GPT2LMHeadModel, GPT2Tokenizer, TextIteratorStreamer
 
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("transformers").setLevel(logging.ERROR)
@@ -13,6 +14,7 @@ class GPT2Streamer:
         self.model_name = model_name
         self.tokenizer = None
         self.model = None
+        self.model_dir = "gpt2_local"
         self.gui = gui_ref
         if self.gui:
             logging.info("GUI working.")
@@ -32,10 +34,22 @@ class GPT2Streamer:
 
     def run_gpt2_streamed(self, prompt, max_length=250):
         """Run GPT-2 with streaming output."""
-        if not self.tokenizer or not self.model:
-            logging.info("Loading GPT-2 model and tokenizer...")
-            self.tokenizer = OpenAIGPTTokenizer.from_pretrained(self.model_name)
-            self.model = OpenAIGPTLMHeadModel.from_pretrained(self.model_name)
+        if os.path.exists(self.model_dir) and os.path.exists(os.path.join(self.model_dir, "config.json")):
+            logging.info("Loading GPT-2 from local disk...")
+            self.tokenizer = GPT2Tokenizer.from_pretrained(self.model_dir)
+            self.model = GPT2LMHeadModel.from_pretrained(self.model_dir)
+        else:
+            logging.info("Local model not found. Downloading from Hugging Face...")
+            self.tokenizer = GPT2Tokenizer.from_pretrained(self.model_name)
+            self.model = GPT2LMHeadModel.from_pretrained(self.model_name)
+            
+            # Create directory if it doesn't exist
+            os.makedirs(self.model_dir, exist_ok=True)
+            
+            # This saves the whole set of necessary files to the folder
+            self.model.save_pretrained(self.model_dir)
+            self.tokenizer.save_pretrained(self.model_dir)
+            logging.info(f"Model and tokenizer saved to {self.model_dir}")
 
         inputs = self.tokenizer(prompt, return_tensors="pt")
 
