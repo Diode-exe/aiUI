@@ -59,4 +59,6 @@ gui = GUI()
 mode_choose = Mode(gui_ref=gui)
 mode_chosen = mode_choose.chooser()
 
+gpt_class = GPT(gui_ref=gui)
+
 gui.root.mainloop()
