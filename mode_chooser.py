@@ -8,8 +8,12 @@ class Mode:
     def __init__(self, gui_ref=None):
         self.mode_name = None
         self.gui_ref = gui_ref
+        self.ok_btn = None
+        self.cancel_btn = None
         self.chooser_window = tk.Toplevel(master=self.gui_ref.root)
         self.chooser_window.title("Select Generation Mode")
+        self.chooser_window.bind("<Escape>", lambda e: self.cancel_btn.invoke())  # esc to exit
+        self.chooser_window.bind("<Return>", lambda e: self.ok_btn.invoke())  # enter to confirm
         # Bind the StringVar to the chooser window so selections are captured
         self.var = tk.StringVar(master=self.chooser_window, value="GPT-1")  # Default selection
 
@@ -24,8 +28,10 @@ class Mode:
 
         btn_frame = tk.Frame(self.chooser_window)
         btn_frame.pack(pady=8)
-        tk.Button(btn_frame, text="OK", command=self.on_ok).pack(side="left", padx=6)
-        tk.Button(btn_frame, text="Cancel", command=lambda: sys.exit(0)).pack(side="left", padx=6)
+        self.ok_btn = tk.Button(btn_frame, text="OK", command=self.on_ok)
+        self.ok_btn.pack(side="left", padx=6)
+        self.cancel_btn = tk.Button(btn_frame, text="Cancel", command=lambda: sys.exit(0))
+        self.cancel_btn.pack(side="left", padx=6)
         self.chooser_window.grab_set()
         self.chooser_window.wait_window()
         return self.mode_name
