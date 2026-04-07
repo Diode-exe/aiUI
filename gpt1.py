@@ -50,7 +50,7 @@ class GPT1Streamer:
             # This saves the whole set of necessary files to the folder
             self.model.save_pretrained(self.model_dir)
             self.tokenizer.save_pretrained(self.model_dir)
-            logging.info(f"Model and tokenizer saved to %s", self.model_dir)
+            logging.info("Model and tokenizer saved to %s", self.model_dir)
 
         inputs = self.tokenizer(prompt, return_tensors="pt")
 

@@ -34,7 +34,8 @@ class GPT2Streamer:
 
     def run_gpt2_streamed(self, prompt, max_length=250):
         """Run GPT-2 with streaming output."""
-        if os.path.exists(self.model_dir) and os.path.exists(os.path.join(self.model_dir, "config.json")):
+        if os.path.exists(self.model_dir) and \
+           os.path.exists(os.path.join(self.model_dir, "config.json")):
             logging.info("Loading GPT-2 from local disk...")
             self.tokenizer = GPT2Tokenizer.from_pretrained(self.model_dir)
             self.model = GPT2LMHeadModel.from_pretrained(self.model_dir)
@@ -49,7 +50,7 @@ class GPT2Streamer:
             # This saves the whole set of necessary files to the folder
             self.model.save_pretrained(self.model_dir)
             self.tokenizer.save_pretrained(self.model_dir)
-            logging.info(f"Model and tokenizer saved to %s", self.model_dir)
+            logging.info("Model and tokenizer saved to %s", self.model_dir)
 
         inputs = self.tokenizer(prompt, return_tensors="pt")
 
