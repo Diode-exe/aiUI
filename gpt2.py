@@ -4,6 +4,7 @@ from threading import Thread
 import os
 import logging
 from transformers import GPT2LMHeadModel, GPT2Tokenizer, TextIteratorStreamer
+from transformers import StoppingCriteria, StoppingCriteriaList
 
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("transformers").setLevel(logging.ERROR)
@@ -34,6 +35,9 @@ class GPT2Streamer:
 
     def run_gpt2_streamed(self, prompt, max_length=250):
         """Run GPT-2 with streaming output."""
+        # reset stop flag for this run
+        self.stop_requested = False
+
         if os.path.exists(self.model_dir) and \
            os.path.exists(os.path.join(self.model_dir, "config.json")):
             logging.info("Loading GPT-2 from local disk...")
@@ -58,7 +62,17 @@ class GPT2Streamer:
         # skip_prompt=True ensures we only print the NEW stuff
         streamer = TextIteratorStreamer(self.tokenizer, skip_prompt=True, skip_special_tokens=True)
 
-        # 2. Define the generation arguments
+        # 2. Define a stopping criteria that can be triggered externally
+        class _StreamStopCriteria(StoppingCriteria):
+            def __init__(self, parent):
+                self.parent = parent
+
+            def __call__(self, input_ids, scores, **kwargs):
+                return getattr(self.parent, "stop_requested", False)
+
+        self._stop_criteria = StoppingCriteriaList([_StreamStopCriteria(self)])
+
+        # 3. Define the generation arguments
         generation_kwargs = dict(
             input_ids=inputs["input_ids"],
             streamer=streamer,
@@ -66,7 +80,8 @@ class GPT2Streamer:
             do_sample=True,
             top_k=50,
             top_p=0.95,
-            no_repeat_ngram_size=2
+            no_repeat_ngram_size=2,
+            stopping_criteria=self._stop_criteria,
         )
 
         # 3. Start generation in a separate thread
@@ -86,4 +101,11 @@ class GPT2Streamer:
             else:
                 print(new_text, end="", flush=True)
 
+        # generation finished; reset stop flag
+        self.stop_requested = False
+
         print("\n--- Generation Finished ---")
+
+    def request_stop(self):
+        """Request that the running generation stop as soon as the model checks criteria."""
+        self.stop_requested = True
