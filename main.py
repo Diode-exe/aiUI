@@ -1,20 +1,20 @@
 """Main application to run the GPT-1 streaming GUI."""
 
+import logging
 from threading import Thread
 import tkinter as tk
 from gpt1 import GPT1Streamer
 from gpt2 import GPT2Streamer
 from mode_chooser import Mode
 
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
 class GUI:
     """Simple GUI to interact with GPT streaming output."""
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("GPT Streaming Output")
-        self.setup_widgets()
-
-    def setup_widgets(self):
-        """Set up the GUI widgets."""
+        self.root.withdraw()
         self.prompt_label = tk.Label(self.root, text="Enter your prompt:")
         self.prompt_label.pack()
 
@@ -38,13 +38,38 @@ class GPT:
     def generate_text(self):
         """Generate text using GPT-1 and display it in the GUI."""
         prompt = self.gui.prompt_entry.get()
-        if prompt:
+        if mode_chosen == "GPT-1":
+            logging.info("Starting GPT-1 streaming generation.")
             self.gui.output_text.delete(1.0, tk.END)  # Clear previous output
-            Thread(target=self.gpt1.run_gpt1_streamed, args=(prompt,), daemon=True).start()
+            gpt1_thread = Thread(target=self.gpt1.run_gpt1_streamed, args=(prompt,), daemon=True)
+            gpt1_thread.start()
+        elif mode_chosen == "GPT-2":
+            logging.info("Starting GPT-2 streaming generation.")
+            self.gui.output_text.delete(1.0, tk.END)  # Clear previous output
+            gpt2_thread = Thread(target=self.gpt2.run_gpt2_streamed, args=(prompt,), daemon=True)
+            gpt2_thread.start()
+        else:
+            logging.warning("Mode %s not implemented yet.", mode_chosen)
+            self.gui.output_text.delete(1.0, tk.END)
+            self.gui.output_text.insert("end", f"Mode '{mode_chosen}' not implemented yet.")
 
 gui = GUI()
+
+# Start model initialization in background so downloads don't wait for the chooser to close.
+gpt = None
+def create_gpt():
+    global gpt
+    gpt = GPT(gui)
+    # Configure the generate button on the Tk main thread once GPT is ready.
+    gui.root.after(0, lambda: gui.generate_button.config(command=gpt.generate_text))
+
 mode_choose = Mode(gui_ref=gui)
-mode_choose.chooser()
-gpt = GPT(gui)
-gui.generate_button.config(command=gpt.generate_text)
+mode_chosen = mode_choose.chooser()
+
+Thread(target=create_gpt, daemon=True).start()
+
+# If GPT finished before chooser closed, ensure button is configured.
+if gpt:
+    gui.generate_button.config(command=gpt.generate_text)
+
 gui.root.mainloop()
