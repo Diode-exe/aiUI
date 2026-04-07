@@ -34,7 +34,8 @@ class GPT1Streamer:
 
     def run_gpt1_streamed(self, prompt, max_length=250):
         """Run GPT-1 with streaming output."""
-        if os.path.exists(self.model_dir) and os.path.exists(os.path.join(self.model_dir, "config.json")):
+        if os.path.exists(self.model_dir) and \
+           os.path.exists(os.path.join(self.model_dir, "config.json")):
             logging.info("Loading GPT-1 from local disk...")
             self.tokenizer = OpenAIGPTTokenizer.from_pretrained(self.model_dir)
             self.model = OpenAIGPTLMHeadModel.from_pretrained(self.model_dir)
@@ -42,14 +43,14 @@ class GPT1Streamer:
             logging.info("Local model not found. Downloading from Hugging Face...")
             self.tokenizer = OpenAIGPTTokenizer.from_pretrained(self.model_name)
             self.model = OpenAIGPTLMHeadModel.from_pretrained(self.model_name)
-            
+
             # Create directory if it doesn't exist
             os.makedirs(self.model_dir, exist_ok=True)
-            
+
             # This saves the whole set of necessary files to the folder
             self.model.save_pretrained(self.model_dir)
             self.tokenizer.save_pretrained(self.model_dir)
-            logging.info(f"Model and tokenizer saved to {self.model_dir}")
+            logging.info(f"Model and tokenizer saved to %s", self.model_dir)
 
         inputs = self.tokenizer(prompt, return_tensors="pt")
 
