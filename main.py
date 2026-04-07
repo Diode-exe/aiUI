@@ -16,15 +16,15 @@ class GUI:
         self.root.title("GPT Streaming Output")
         self.root.withdraw()
         self.field_frame = tk.Frame(self.root)
-        self.prompt_label = tk.Label(self.field_frame, text="Enter your prompt:", justify="left")
-        self.prompt_label.pack()
+        self.prompt_label = tk.Label(self.field_frame, text="Enter your prompt:")
+        self.prompt_label.pack(side="left")
 
-        self.prompt_entry = tk.Entry(self.field_frame, width=50, justify="left")
-        self.prompt_entry.pack()
-        self.length_label = tk.Label(self.field_frame, text="Max Length (GPT-2 only):", justify="right")
-        self.length_label.pack()
-        self.length_entry = tk.Entry(self.field_frame, width=10, justify="right")
-        self.length_entry.pack()
+        self.prompt_entry = tk.Entry(self.field_frame, width=50)
+        self.prompt_entry.pack(side="left", padx=10)
+        self.length_label = tk.Label(self.field_frame, text="Max Length (GPT-2 only):")
+        self.length_label.pack(side="right")
+        self.length_entry = tk.Entry(self.field_frame, width=10)
+        self.length_entry.pack(side="right")
         self.field_frame.pack()
 
         # command set later to avoid circular dependency
@@ -42,12 +42,14 @@ class GPT:
         self.gpt2 = GPT2Streamer(gui_ref=gui_ref)
         self.gui = gui_ref
         self.gui.generate_button.config(command=self.generate_text)
+        self.length = 250
 
     def generate_text(self):
         """Generate text using GPT-1 and display it in the GUI."""
         logging.info("Generate button clicked.")
         prompt = self.gui.prompt_entry.get()
         logging.info("Prompt received: %s", prompt)
+        # initialize length variable to satisfy static analysis and provide a default
         if mode_chosen == "GPT-1":
             logging.info("Starting GPT-1 streaming generation.")
             self.gui.output_text.delete(1.0, tk.END)  # Clear previous output
@@ -56,7 +58,12 @@ class GPT:
         elif mode_chosen == "GPT-2":
             logging.info("Starting GPT-2 streaming generation.")
             self.gui.output_text.delete(1.0, tk.END)  # Clear previous output
-            gpt2_thread = Thread(target=self.gpt2.run_gpt2_streamed, args=(prompt, length if 'length' in locals() else 250), daemon=True)
+            # Read length from GUI; fall back to 250 if blank or invalid
+            try:
+                length = int(self.gui.length_entry.get())
+            except Exception:
+                length = 250
+            gpt2_thread = Thread(target=self.gpt2.run_gpt2_streamed, args=(prompt, length), daemon=True)
             gpt2_thread.start()
         else:
             logging.warning("Mode %s not implemented yet.", mode_chosen)
