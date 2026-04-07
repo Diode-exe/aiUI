@@ -42,10 +42,10 @@ class GPT2Streamer:
             logging.info("Local model not found. Downloading from Hugging Face...")
             self.tokenizer = GPT2Tokenizer.from_pretrained(self.model_name)
             self.model = GPT2LMHeadModel.from_pretrained(self.model_name)
-            
+
             # Create directory if it doesn't exist
             os.makedirs(self.model_dir, exist_ok=True)
-            
+
             # This saves the whole set of necessary files to the folder
             self.model.save_pretrained(self.model_dir)
             self.tokenizer.save_pretrained(self.model_dir)
