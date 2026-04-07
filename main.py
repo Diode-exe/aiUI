@@ -30,6 +30,8 @@ class GUI:
         # command set later to avoid circular dependency
         self.generate_button = tk.Button(self.root, text="Generate", command=None)
         self.generate_button.pack()
+        
+        self.root.bind("<Return>", lambda e: self.generate_button.invoke())  # Enter key triggers generation
 
         self.output_text = tk.Text(self.root, height=20, width=60)
         self.output_text.pack()
@@ -57,7 +59,8 @@ class GPT:
                 length = int(self.gui.length_entry.get())
             except Exception:
                 length = 250
-            gpt1_thread = Thread(target=self.gpt1.run_gpt1_streamed, args=(prompt, length), daemon=True)
+            gpt1_thread = Thread(target=self.gpt1.run_gpt1_streamed,
+                                 args=(prompt, length), daemon=True)
             gpt1_thread.start()
         elif mode_chosen == "GPT-2":
             logging.info("Starting GPT-2 streaming generation.")
@@ -67,7 +70,8 @@ class GPT:
                 length = int(self.gui.length_entry.get())
             except Exception:
                 length = 250
-            gpt2_thread = Thread(target=self.gpt2.run_gpt2_streamed, args=(prompt, length), daemon=True)
+            gpt2_thread = Thread(target=self.gpt2.run_gpt2_streamed,
+                                 args=(prompt, length), daemon=True)
             gpt2_thread.start()
         else:
             logging.warning("Mode %s not implemented yet.", mode_chosen)
