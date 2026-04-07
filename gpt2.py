@@ -29,8 +29,8 @@ class GPT2Streamer:
 
         self.gui.root.after(0, _append)
 
-    def run_gpt1_streamed(self, prompt, max_length=250):
-        """Run GPT-1 with streaming output."""
+    def run_gpt2_streamed(self, prompt, max_length=250):
+        """Run GPT-2 with streaming output."""
         inputs = self.tokenizer(prompt, return_tensors="pt")
 
         # 1. Initialize the streamer
@@ -55,9 +55,9 @@ class GPT2Streamer:
 
         # 4. Iterate over the streamer and print live
         if self.gui:
-            self._append_gui_text(f"--- GPT-1 Output (Streaming) ---\n{prompt}")
+            self._append_gui_text(f"--- GPT-2 Output (Streaming) ---\n{prompt}")
         else:
-            print(f"--- GPT-1 Output (Streaming) ---\n{prompt}", end="", flush=True)
+            print(f"--- GPT-2 Output (Streaming) ---\n{prompt}", end="", flush=True)
 
         for new_text in streamer:
             if self.gui:
