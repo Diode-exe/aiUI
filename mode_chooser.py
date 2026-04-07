@@ -30,11 +30,17 @@ class Mode:
         btn_frame.pack(pady=8)
         self.ok_btn = tk.Button(btn_frame, text="OK", command=self.on_ok)
         self.ok_btn.pack(side="left", padx=6)
-        self.cancel_btn = tk.Button(btn_frame, text="Cancel", command=lambda: sys.exit(0))
+        self.cancel_btn = tk.Button(btn_frame, text="Cancel", command=self.kill)
         self.cancel_btn.pack(side="left", padx=6)
         self.chooser_window.grab_set()
         self.chooser_window.wait_window()
         return self.mode_name
+    
+    def kill(self):
+        """Kill the chooser window if it's still open."""
+        if self.chooser_window.winfo_exists():
+            self.chooser_window.destroy()
+        sys.exit(0)
 
     def on_ok(self):
         """Handle OK button click: save selection, close chooser, and reopen main window."""
