@@ -34,6 +34,7 @@ class GPT:
         self.gpt1 = GPT1Streamer(gui_ref=gui_ref)
         self.gpt2 = GPT2Streamer(gui_ref=gui_ref)
         self.gui = gui_ref
+        self.gui.generate_button.config(command=self.generate_text)
 
     def generate_text(self):
         """Generate text using GPT-1 and display it in the GUI."""
@@ -55,21 +56,7 @@ class GPT:
 
 gui = GUI()
 
-# Start model initialization in background so downloads don't wait for the chooser to close.
-gpt = None
-def create_gpt():
-    global gpt
-    gpt = GPT(gui)
-    # Configure the generate button on the Tk main thread once GPT is ready.
-    gui.root.after(0, lambda: gui.generate_button.config(command=gpt.generate_text))
-
 mode_choose = Mode(gui_ref=gui)
 mode_chosen = mode_choose.chooser()
-
-Thread(target=create_gpt, daemon=True).start()
-
-# If GPT finished before chooser closed, ensure button is configured.
-if gpt:
-    gui.generate_button.config(command=gpt.generate_text)
 
 gui.root.mainloop()
