@@ -5,8 +5,9 @@ import tkinter as tk
 
 class Mode:
     """Class to manage mode selection via a modal dialog."""
-    def __init__(self):
+    def __init__(self, gui_ref=None):
         self.mode_name = None
+        self.gui_ref = gui_ref
         self.chooser_window = tk.Tk()
         self.chooser_window.title("Select Generation Mode")
 
@@ -20,6 +21,8 @@ class Mode:
         def on_ok():
             self.mode_name = var.get()
             self.chooser_window.destroy()
+            self.reappear()
+            return self.mode_name
 
         btn_frame = tk.Frame(self.chooser_window)
         btn_frame.pack(pady=8)
@@ -28,3 +31,7 @@ class Mode:
 
         self.chooser_window.mainloop()
         return self.mode_name
+
+    def reappear(self):
+        """Reopen the main window"""
+        self.gui_ref.root.deiconify()
