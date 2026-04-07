@@ -21,7 +21,7 @@ class GUI:
 
         self.prompt_entry = tk.Entry(self.field_frame, width=50)
         self.prompt_entry.pack(side="left", padx=10)
-        self.length_label = tk.Label(self.field_frame, text="Max Length (GPT-2 only):")
+        self.length_label = tk.Label(self.field_frame, text="Max Length:")
         self.length_label.pack(side="right")
         self.length_entry = tk.Entry(self.field_frame, width=10)
         self.length_entry.pack(side="right")
@@ -53,7 +53,11 @@ class GPT:
         if mode_chosen == "GPT-1":
             logging.info("Starting GPT-1 streaming generation.")
             self.gui.output_text.delete(1.0, tk.END)  # Clear previous output
-            gpt1_thread = Thread(target=self.gpt1.run_gpt1_streamed, args=(prompt,), daemon=True)
+            try:
+                length = int(self.gui.length_entry.get())
+            except Exception:
+                length = 250
+            gpt1_thread = Thread(target=self.gpt1.run_gpt1_streamed, args=(prompt, length), daemon=True)
             gpt1_thread.start()
         elif mode_chosen == "GPT-2":
             logging.info("Starting GPT-2 streaming generation.")
