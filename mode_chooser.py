@@ -10,14 +10,16 @@ class Mode:
         self.gui_ref = gui_ref
         self.chooser_window = tk.Toplevel(master=self.gui_ref.root)
         self.chooser_window.title("Select Generation Mode")
-        self.var = tk.StringVar(value="GPT-1")  # Default selection
+        # Bind the StringVar to the chooser window so selections are captured
+        self.var = tk.StringVar(master=self.chooser_window, value="GPT-1")  # Default selection
 
     def chooser(self, options=("GPT-1", "GPT-2", "Other")):
         """Open a modal Toplevel with radio buttons and return the choice."""
 
-        var = tk.StringVar(master=self.chooser_window, value=self.mode_name or options[0])
+        # Use the instance StringVar so on_ok can read the selected value
+        self.var.set(self.mode_name or options[0])
         for opt in options:
-            tk.Radiobutton(self.chooser_window, text=opt, variable=var,
+            tk.Radiobutton(self.chooser_window, text=opt, variable=self.var,
                            value=opt).pack(anchor="w", padx=8, pady=2)
 
         btn_frame = tk.Frame(self.chooser_window)
