@@ -47,7 +47,6 @@ class Mode:
         if self.chooser_window.winfo_exists():
             self.chooser_window.destroy()
         self.gui_ref.root.destroy()
-        sys.exit(0)
 
     def ask_to_kill(self):
         """Ask the user to confirm exiting the application."""
