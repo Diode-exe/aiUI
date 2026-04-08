@@ -2,6 +2,9 @@
 
 import tkinter as tk
 import sys
+import logging
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class Mode:
     """Class to manage mode selection via a modal dialog."""
@@ -12,8 +15,10 @@ class Mode:
         self.cancel_btn = None
         self.chooser_window = tk.Toplevel(master=self.gui_ref.root)
         self.chooser_window.title("Select Generation Mode")
-        self.chooser_window.bind("<Escape>", lambda e: self.cancel_btn.invoke())  # esc to exit
-        self.chooser_window.bind("<Return>", lambda e: self.ok_btn.invoke())  # enter to confirm
+        self.chooser_window.bind("<Escape>", lambda e:
+            self.invoke_button(self.cancel_btn))  # esc to exit
+        self.chooser_window.bind("<Return>", lambda e:
+            self.invoke_button(self.ok_btn))  # enter to confirm
         # Bind the StringVar to the chooser window so selections are captured
         self.var = tk.StringVar(master=self.chooser_window, value="GPT-1")  # Default selection
 
@@ -52,3 +57,11 @@ class Mode:
     def reappear(self):
         """Reopen the main window"""
         self.gui_ref.root.deiconify()
+
+    def invoke_button(self, button):
+        """Invoke a button's command programmatically."""
+        try:
+            if button and button.winfo_exists():
+                button.invoke()
+        except AttributeError:
+            logging.error("Button does not exist or has no command to invoke.")
