@@ -35,7 +35,7 @@ class Mode:
         self.chooser_window.grab_set()
         self.chooser_window.wait_window()
         return self.mode_name
-    
+
     def kill(self):
         """Kill the chooser window if it's still open."""
         if self.chooser_window.winfo_exists():

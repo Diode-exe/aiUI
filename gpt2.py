@@ -71,8 +71,8 @@ class GPT2Streamer:
                 return getattr(self.parent, "stop_requested", False)
 
         self._stop_criteria = StoppingCriteriaList([_StreamStopCriteria(self)])
-        
-        # generation arguments        
+
+        # generation arguments
         generation_kwargs = {
             "input_ids": inputs["input_ids"],
             "streamer": streamer,
