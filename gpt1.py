@@ -72,17 +72,17 @@ class GPT1Streamer:
 
         self._stop_criteria = StoppingCriteriaList([_StreamStopCriteria(self)])
 
-        # 3. Define the generation arguments
-        generation_kwargs = dict(
-            input_ids=inputs["input_ids"],
-            streamer=streamer,
-            max_length=max_length,
-            do_sample=True,
-            top_k=50,
-            top_p=0.95,
-            no_repeat_ngram_size=3,
-            stopping_criteria=self._stop_criteria,
-        )
+        # generation arguments
+        generation_kwargs = {
+            "input_ids": inputs["input_ids"],
+            "streamer": streamer,
+            "max_length": max_length,
+            "do_sample": True,
+            "top_k": 50,
+            "top_p": 0.95,
+            "no_repeat_ngram_size": 3,
+            "stopping_criteria": self._stop_criteria,
+        }
 
         # 3. Start generation in a separate thread
         # This prevents the program from freezing while waiting for the model
