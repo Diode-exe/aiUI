@@ -15,6 +15,8 @@ class GPT1Streamer:
         self.model_name = model_name
         self.tokenizer = None
         self.model = None
+        self.stop_requested = False
+        self._stop_criteria = None
         self.model_dir = "gpt1_local"
         self.gui = gui_ref
         if self.gui:
