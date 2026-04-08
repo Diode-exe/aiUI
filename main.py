@@ -1,6 +1,7 @@
 """Main application to run the GPT-1 streaming GUI."""
 
 import logging
+import sys
 from threading import Thread
 import tkinter as tk
 from gpt1 import GPT1Streamer
@@ -120,6 +121,11 @@ gui = GUI()
 mode_choose = Mode(gui_ref=gui)
 mode_chosen = mode_choose.chooser()
 
-gpt_class = GPT(gui_ref=gui)
+try:
+    gpt_class = GPT(gui_ref=gui)
+except tk.TclError as e:
+    logging.error("Failed to initialize GPT class due to Tkinter error: %s", e)
+    logging.info("May have exited via Cancel button. Exiting application.")
+    sys.exit(0)
 
 gui.root.mainloop()
