@@ -1,6 +1,7 @@
 """Mode chooser dialog for selecting generation mode."""
 
 import tkinter as tk
+from tkinter import messagebox
 import sys
 import logging
 
@@ -35,7 +36,7 @@ class Mode:
         btn_frame.pack(pady=8)
         self.ok_btn = tk.Button(btn_frame, text="OK", command=self.on_ok)
         self.ok_btn.pack(side="left", padx=6)
-        self.cancel_btn = tk.Button(btn_frame, text="Cancel", command=self.kill)
+        self.cancel_btn = tk.Button(btn_frame, text="Cancel", command=self.ask_to_kill)
         self.cancel_btn.pack(side="left", padx=6)
         self.chooser_window.grab_set()
         self.chooser_window.wait_window()
@@ -45,7 +46,13 @@ class Mode:
         """Kill the chooser window if it's still open."""
         if self.chooser_window.winfo_exists():
             self.chooser_window.destroy()
+        self.gui_ref.root.destroy()
         sys.exit(0)
+
+    def ask_to_kill(self):
+        """Ask the user to confirm exiting the application."""
+        if messagebox.askyesno("Exit", "Are you sure you want to exit?"):
+            self.kill()
 
     def on_ok(self):
         """Handle OK button click: save selection, close chooser, and reopen main window."""
