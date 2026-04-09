@@ -36,7 +36,8 @@ class GUI:
         # buttons (command set later to avoid circular dependency)
         self.button_frame = tk.Frame(self.root)
         self.status_var = tk.StringVar(value="Ready")
-        self.status_label = tk.Label(self.button_frame, textvariable=self.status_var)
+        # Use a fixed-width label so updating status text doesn't shift buttons
+        self.status_label = tk.Label(self.button_frame, textvariable=self.status_var, width=12, anchor="w")
         self.status_label.pack(side="left", padx=6)
         self.generate_button = tk.Button(self.button_frame, text="Generate", command=None)
         self.generate_button.pack(side="left", padx=6)
@@ -80,19 +81,27 @@ class GPT:
     def generate_text(self):
         """Generate text using GPT-1 and display it in the GUI."""
         logging.info("Generate button clicked.")
+        if self.gui:
+            self.gui.status_var.set("Generating...")
         # If a generation thread is already running, do not start another.
         # Stopping threads forcibly (e.g. using private methods) is unsafe, so we simply refuse.
         if self.gpt1_thread and self.gpt1_thread.is_alive():
             logging.warning("GPT-1 generation is still running. Please wait until it finishes.")
+            if self.gui:
+                self.gui.status_var.set("GPT-1 still running...")
             return
         if self.gpt2_thread and self.gpt2_thread.is_alive():
             logging.warning("GPT-2 generation is still running. Please wait until it finishes.")
+            if self.gui:
+                self.gui.status_var.set("GPT-2 still running...")
             return
         prompt = self.gui.prompt_entry.get()
         logging.info("Prompt received: %s", prompt)
         # initialize length variable to satisfy static analysis and provide a default
         if self.gui.mode_chosen == "GPT-1":
             logging.info("Starting GPT-1 streaming generation.")
+            if self.gui:
+                self.gui.status_var.set("Starting GPT-1 generation...")
             self.gui.output_text.delete(1.0, tk.END)  # Clear previous output
             try:
                 length = int(self.gui.length_entry.get())
@@ -103,6 +112,8 @@ class GPT:
             self.gpt1_thread.start()
         elif self.gui.mode_chosen == "GPT-2":
             logging.info("Starting GPT-2 streaming generation.")
+            if self.gui:
+                self.gui.status_var.set("Starting GPT-2 generation...")
             self.gui.output_text.delete(1.0, tk.END)  # Clear previous output
             # Read length from GUI; fall back to 250 if blank or invalid
             try:
@@ -114,6 +125,8 @@ class GPT:
             self.gpt2_thread.start()
         else:
             logging.info("Starting Other model streaming generation.")
+            if self.gui:
+                self.gui.status_var.set("Starting Other model generation...")
             self.gui.output_text.delete(1.0, tk.END)  # Clear previous output
             try:
                 length = int(self.gui.length_entry.get())
@@ -126,25 +139,35 @@ class GPT:
     def stop_generation(self):
         """Request the currently running generation to stop."""
         logging.info("Stop requested from GUI.")
+        if self.gui:
+            self.gui.status_var.set("Stop requested...")
         # Prefer to stop the thread that is currently running
         if self.gpt1_thread and self.gpt1_thread.is_alive():
             logging.info("Requesting stop for GPT-1")
+            if self.gui:
+                self.gui.status_var.set("Stopping GPT-1...")
             self.gpt1.request_stop()
             self.gui.output_text.insert("end", "\n[Stop requested for GPT-1]\n")
             return
         if self.gpt2_thread and self.gpt2_thread.is_alive():
             logging.info("Requesting stop for GPT-2")
+            if self.gui:
+                self.gui.status_var.set("Stopping GPT-2...")
             self.gpt2.request_stop()
             self.gui.output_text.insert("end", "\n[Stop requested for GPT-2]\n")
             return
         if self.other_model_thread and self.other_model_thread.is_alive():
             logging.info("Requesting stop for Other model")
+            if self.gui:
+                self.gui.status_var.set("Stopping Other model...")
             self.other_model.request_stop()
             self.gui.output_text.insert("end", "\n[Stop requested for Other model]\n")
             return
 
         logging.info("No active generation to stop.")
-        self.gui.output_text.insert("end", "\n[No active generation to stop]\n")
+        if self.gui:
+            self.gui.status_var.set("[No active generation to stop]")
+        # self.gui.output_text.insert("end", "\n[No active generation to stop]\n")
 
 gui = GUI()
 
