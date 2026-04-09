@@ -6,4 +6,8 @@ The whole premise of this program is that it doesn't work properly. The AI doesn
 
 ## Usage
 
-Run ```main.py```. Choose GPT-1, GPT-2, or Other Model. Other Model is ```TinyLlama/TinyLlama-1.1B-Chat-v1.0```. Then, type in your prompt and it will give you a response. The max length box controls how many tokens the AI will generate before it stops. When left blank, it defaults to 250. 
+Run ```main.py```. Choose GPT-1, GPT-2, or Other Model. Other Model is ```TinyLlama/TinyLlama-1.1B-Chat-v1.0```. Then, type in your prompt and it will give you a response. The max length box controls how many tokens the AI will generate before it stops. When left blank, it defaults to 250. You could change the "Other Model" if you want. 
+
+## Notes
+
+All models automatically save to disk after being downloaded, so they will load faster the next time you run the program. 
