@@ -49,10 +49,10 @@ class OtherModelStreamer:
                 "Try upgrading with `pip install -U transformers`."
             ) from e
         if os.path.exists(self.model_dir) and \
-           os.path.exists(os.path.join(self.model_dir, "config.json")):
-                logging.info("Loading Other Model from local disk...")
-                self.tokenizer = AutoTokenizer.from_pretrained(self.model_dir)
-                self.model = AutoModelForCausalLM.from_pretrained(self.model_dir)
+        os.path.exists(os.path.join(self.model_dir, "config.json")):
+            logging.info("Loading Other Model from local disk...")
+            self.tokenizer = AutoTokenizer.from_pretrained(self.model_dir)
+            self.model = AutoModelForCausalLM.from_pretrained(self.model_dir)
         else:
             logging.info("Local model not found. Downloading from Hugging Face...")
             self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
