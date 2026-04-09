@@ -15,3 +15,5 @@ The whole premise of this program is that it doesn't work properly. The AI doesn
 ## Notes
 
 All models automatically save to disk after being downloaded, so they will load faster the next time you run the program.
+
+Pressing Enter will submit your prompt
