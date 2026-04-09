@@ -119,7 +119,6 @@ class GPT:
             self.other_model_thread = Thread(target=self.other_model.run_other_model_streamed,
                                              args=(prompt, length), daemon=True)
             self.other_model_thread.start()
-        logging.info("Generation process completed.")
 
     def stop_generation(self):
         """Request the currently running generation to stop."""
