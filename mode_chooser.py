@@ -42,17 +42,6 @@ class Mode:
         self.chooser_window.wait_window()
         return self.mode_name
 
-    def kill(self):
-        """Kill the chooser window if it's still open."""
-        if self.chooser_window.winfo_exists():
-            self.chooser_window.destroy()
-        self.gui_ref.root.destroy()
-
-    def ask_to_kill(self):
-        """Ask the user to confirm exiting the application."""
-        if messagebox.askyesno("Exit", "Are you sure you want to exit?"):
-            self.kill()
-
     def on_ok(self):
         """Handle OK button click: save selection, close chooser, and reopen main window."""
         self.mode_name = self.var.get()

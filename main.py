@@ -4,6 +4,7 @@ import logging
 import sys
 from threading import Thread
 import tkinter as tk
+from tkinter import messagebox
 from gpt1 import GPT1Streamer
 from gpt2 import GPT2Streamer
 from mode_chooser import Mode
@@ -13,8 +14,11 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 class GUI:
     """Simple GUI to interact with GPT streaming output."""
     def __init__(self):
+        self.mode_chosen = None
+        self.mode_choose = None
         self.root = tk.Tk()
         self.root.title("GPT Streaming Output")
+        self.root.protocol("WM_DELETE_WINDOW", self.ask_to_kill)
         self.root.withdraw()
         self.field_frame = tk.Frame(self.root)
         self.prompt_label = tk.Label(self.field_frame, text="Enter your prompt:")
@@ -42,6 +46,17 @@ class GUI:
 
         self.output_text = tk.Text(self.root, height=20, width=60)
         self.output_text.pack()
+    
+    def kill(self):
+        """Kill the chooser window if it's still open."""
+        if self.chooser_window.winfo_exists():
+            self.chooser_window.destroy()
+        self.root.destroy()
+
+    def ask_to_kill(self):
+        """Ask the user to confirm exiting the application."""
+        if messagebox.askyesno("Exit", "Are you sure you want to exit?"):
+            self.kill()
 
 class GPT:
     """Class to manage GPT streaming generation."""
@@ -72,7 +87,7 @@ class GPT:
         prompt = self.gui.prompt_entry.get()
         logging.info("Prompt received: %s", prompt)
         # initialize length variable to satisfy static analysis and provide a default
-        if mode_chosen == "GPT-1":
+        if self.gui.mode_chosen == "GPT-1":
             logging.info("Starting GPT-1 streaming generation.")
             self.gui.output_text.delete(1.0, tk.END)  # Clear previous output
             try:
@@ -82,7 +97,7 @@ class GPT:
             self.gpt1_thread = Thread(target=self.gpt1.run_gpt1_streamed,
                                       args=(prompt, length), daemon=True)
             self.gpt1_thread.start()
-        elif mode_chosen == "GPT-2":
+        elif self.gui.mode_chosen == "GPT-2":
             logging.info("Starting GPT-2 streaming generation.")
             self.gui.output_text.delete(1.0, tk.END)  # Clear previous output
             # Read length from GUI; fall back to 250 if blank or invalid
@@ -94,9 +109,9 @@ class GPT:
                                       args=(prompt, length), daemon=True)
             self.gpt2_thread.start()
         else:
-            logging.warning("Mode %s not implemented yet.", mode_chosen)
+            logging.warning("Mode %s not implemented yet.", self.gui.mode_chosen)
             self.gui.output_text.delete(1.0, tk.END)
-            self.gui.output_text.insert("end", f"Mode '{mode_chosen}' not implemented yet.")
+            self.gui.output_text.insert("end", f"Mode '{self.gui.mode_chosen}' not implemented yet.")
         logging.info("Generation process completed.")
 
     def stop_generation(self):
@@ -118,8 +133,8 @@ class GPT:
 
 gui = GUI()
 
-mode_choose = Mode(gui_ref=gui)
-mode_chosen = mode_choose.chooser()
+gui.mode_choose = Mode(gui_ref=gui)
+gui.mode_chosen = gui.mode_choose.chooser()
 
 try:
     gpt_class = GPT(gui_ref=gui)
