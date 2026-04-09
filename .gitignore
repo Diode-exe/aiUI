@@ -182,3 +182,4 @@ cython_debug/
 
 gpt1_local/
 gpt2_local/
+/other_model_local
