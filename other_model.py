@@ -4,7 +4,7 @@ from threading import Thread
 
 class OtherModelStreamer:
     """Class to run another model with streaming output."""
-    def __init__(self, model_name="gpt2", gui_ref=None):
+    def __init__(self, model_name="TinyLlama/TinyLlama-1.1B-Chat-v1.0", gui_ref=None):
         self.model_name = model_name
         self.tokenizer = None
         self.model = None
@@ -31,8 +31,23 @@ class OtherModelStreamer:
 
     def run_other_model_streamed(self, prompt, max_length=250):
         """Run other model with streaming output."""
-        from transformers import AutoModelForCausalLM, AutoTokenizer, TextIteratorStreamer
-        from transformers import StoppingCriteria, StoppingCriteriaList
+        # Import heavy transformer classes lazily to avoid import-time failures
+        try:
+            from transformers import AutoModelForCausalLM
+        except Exception:
+            try:
+                # older transformers exposed AutoModelWithLMHead
+                from transformers import AutoModelWithLMHead as AutoModelForCausalLM
+            except Exception:
+                AutoModelForCausalLM = None
+        try:
+            from transformers import AutoTokenizer, TextIteratorStreamer
+            from transformers import StoppingCriteria, StoppingCriteriaList
+        except Exception as e:
+            raise ImportError(
+                "Required classes not available from transformers. "
+                "Try upgrading with `pip install -U transformers`."
+            ) from e
         if os.path.exists(self.model_dir) and \
            os.path.exists(os.path.join(self.model_dir, "config.json")):
                 logging.info("Loading Other Model from local disk...")
@@ -41,6 +56,11 @@ class OtherModelStreamer:
         else:
             logging.info("Local model not found. Downloading from Hugging Face...")
             self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
+            if AutoModelForCausalLM is None:
+                raise ImportError(
+                    "transformers does not provide AutoModelForCausalLM or a compatible fallback. "
+                    "Please upgrade your `transformers` package: `pip install -U transformers`"
+                )
             self.model = AutoModelForCausalLM.from_pretrained(self.model_name)
 
             # Create directory if it doesn't exist
