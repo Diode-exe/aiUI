@@ -3,8 +3,6 @@
 from threading import Thread
 import os
 import logging
-from transformers import GPT2LMHeadModel, GPT2Tokenizer, TextIteratorStreamer
-from transformers import StoppingCriteria, StoppingCriteriaList
 
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("transformers").setLevel(logging.ERROR)
@@ -35,6 +33,8 @@ class GPT2Streamer:
 
     def run_gpt2_streamed(self, prompt, max_length=250):
         """Run GPT-2 with streaming output."""
+        from transformers import GPT2LMHeadModel, GPT2Tokenizer, TextIteratorStreamer
+        from transformers import StoppingCriteria, StoppingCriteriaList
         # reset stop flag for this run
         self.stop_requested = False
 

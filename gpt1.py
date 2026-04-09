@@ -3,8 +3,6 @@
 from threading import Thread
 import os
 import logging
-from transformers import OpenAIGPTTokenizer, OpenAIGPTLMHeadModel, TextIteratorStreamer
-from transformers import StoppingCriteria, StoppingCriteriaList
 
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("transformers").setLevel(logging.ERROR)
@@ -37,6 +35,8 @@ class GPT1Streamer:
 
     def run_gpt1_streamed(self, prompt, max_length=250):
         """Run GPT-1 with streaming output."""
+        from transformers import OpenAIGPTTokenizer, OpenAIGPTLMHeadModel, TextIteratorStreamer
+        from transformers import StoppingCriteria, StoppingCriteriaList
         if os.path.exists(self.model_dir) and \
            os.path.exists(os.path.join(self.model_dir, "config.json")):
             logging.info("Loading GPT-1 from local disk...")
