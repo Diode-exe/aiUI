@@ -36,10 +36,19 @@ class Mode:
         btn_frame.pack(pady=8)
         self.ok_btn = tk.Button(btn_frame, text="OK", command=self.on_ok)
         self.ok_btn.pack(side="left", padx=6)
-        self.cancel_btn = tk.Button(btn_frame, text="Cancel", command=self.ask_to_kill)
+        self.cancel_btn = tk.Button(btn_frame, text="Cancel", command=self.gui_ref.ask_to_kill)
         self.cancel_btn.pack(side="left", padx=6)
         self.chooser_window.grab_set()
         self.chooser_window.wait_window()
+        # If the window was closed without pressing OK (window manager X),
+        # fall back to the current radio selection so callers always receive
+        # a valid mode string and the main window is re-shown.
+        if self.mode_name is None:
+            self.mode_name = self.var.get()
+            try:
+                self.reappear()
+            except Exception:
+                pass
         return self.mode_name
 
     def on_ok(self):
