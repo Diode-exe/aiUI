@@ -7,6 +7,7 @@ import tkinter as tk
 from tkinter import messagebox
 from gpt1 import GPT1Streamer
 from gpt2 import GPT2Streamer
+from other_model import OtherModelStreamer
 from mode_chooser import Mode
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -51,7 +52,6 @@ class GUI:
         """Kill the chooser window if it's still open."""
         if self.root.winfo_exists():
             self.root.destroy()
-        self.root.destroy()
 
     def ask_to_kill(self):
         """Ask the user to confirm exiting the application."""
@@ -72,6 +72,7 @@ class GPT:
         # Keep thread references on the instance so they persist across calls
         self.gpt1_thread = None
         self.gpt2_thread = None
+        self.other_model = OtherModelStreamer(gui_ref=gui_ref)
 
     def generate_text(self):
         """Generate text using GPT-1 and display it in the GUI."""
@@ -109,10 +110,15 @@ class GPT:
                                       args=(prompt, length), daemon=True)
             self.gpt2_thread.start()
         else:
-            logging.warning("Mode %s not implemented yet.", self.gui.mode_chosen)
-            self.gui.output_text.delete(1.0, tk.END)
-            self.gui.output_text.insert("end", f"Mode \
-                                        '{self.gui.mode_chosen}' not implemented yet.")
+            logging.info("Starting Other model streaming generation.")
+            self.gui.output_text.delete(1.0, tk.END)  # Clear previous output
+            try:
+                length = int(self.gui.length_entry.get())
+            except ValueError:
+                length = 250
+            self.other_model_thread = Thread(target=self.other_model.run_other_model_streamed,
+                                             args=(prompt, length), daemon=True)
+            self.other_model_thread.start()
         logging.info("Generation process completed.")
 
     def stop_generation(self):
@@ -129,6 +135,12 @@ class GPT:
             self.gpt2.request_stop()
             self.gui.output_text.insert("end", "\n[Stop requested for GPT-2]\n")
             return
+        if self.other_model_thread and self.other_model_thread.is_alive():
+            logging.info("Requesting stop for Other model")
+            self.other_model.request_stop()
+            self.gui.output_text.insert("end", "\n[Stop requested for Other model]\n")
+            return
+
         logging.info("No active generation to stop.")
         self.gui.output_text.insert("end", "\n[No active generation to stop]\n")
 
