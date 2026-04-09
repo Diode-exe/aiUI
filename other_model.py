@@ -51,10 +51,14 @@ class OtherModelStreamer:
         if os.path.exists(self.model_dir) and \
         os.path.exists(os.path.join(self.model_dir, "config.json")):
             logging.info("Loading Other Model from local disk...")
+            if self.gui:
+                self.gui.status_var.set("Loading Other Model from local disk...")
             self.tokenizer = AutoTokenizer.from_pretrained(self.model_dir)
             self.model = AutoModelForCausalLM.from_pretrained(self.model_dir)
         else:
             logging.info("Local model not found. Downloading from Hugging Face...")
+            if self.gui:
+                self.gui.status_var.set("Downloading Other Model from Hugging Face...")
             self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
             if AutoModelForCausalLM is None:
                 raise ImportError(
@@ -122,4 +126,11 @@ class OtherModelStreamer:
         # generation finished; reset stop flag
         self.stop_requested = False
 
-        print("\n--- Other Model Generation Finished ---")
+        if self.gui:
+            self.gui.status_var.set("Other Model Generation Finished")
+        else:
+            print("\n--- Other Model Generation Finished ---")
+
+    def request_stop(self):
+            """Request that the running generation stop as soon as the model checks criteria."""
+            self.stop_requested = True

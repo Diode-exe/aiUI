@@ -41,10 +41,14 @@ class GPT2Streamer:
         if os.path.exists(self.model_dir) and \
            os.path.exists(os.path.join(self.model_dir, "config.json")):
             logging.info("Loading GPT-2 from local disk...")
+            if self.gui:
+                self.gui.status_var.set("Loading GPT-2 from local disk...")
             self.tokenizer = GPT2Tokenizer.from_pretrained(self.model_dir)
             self.model = GPT2LMHeadModel.from_pretrained(self.model_dir)
         else:
             logging.info("Local model not found. Downloading from Hugging Face...")
+            if self.gui:
+                self.gui.status_var.set("Downloading GPT-2 from Hugging Face...")
             self.tokenizer = GPT2Tokenizer.from_pretrained(self.model_name)
             self.model = GPT2LMHeadModel.from_pretrained(self.model_name)
 
@@ -55,6 +59,8 @@ class GPT2Streamer:
             self.model.save_pretrained(self.model_dir)
             self.tokenizer.save_pretrained(self.model_dir)
             logging.info("Model and tokenizer saved to %s", self.model_dir)
+            if self.gui:
+                self.gui.status_var.set("Model and tokenizer saved to local disk")
 
         inputs = self.tokenizer(prompt, return_tensors="pt")
 
@@ -104,7 +110,10 @@ class GPT2Streamer:
         # generation finished; reset stop flag
         self.stop_requested = False
 
-        print("\n--- Generation Finished ---")
+        if self.gui:
+            self.gui.status_var.set("GPT-2 Generation Finished")
+        else:
+            print("\n--- GPT-2 Generation Finished ---")
 
     def request_stop(self):
         """Request that the running generation stop as soon as the model checks criteria."""
