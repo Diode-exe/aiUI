@@ -46,11 +46,11 @@ class GUI:
 
         self.output_text = tk.Text(self.root, height=20, width=60)
         self.output_text.pack()
-    
+
     def kill(self):
         """Kill the chooser window if it's still open."""
-        if self.chooser_window.winfo_exists():
-            self.chooser_window.destroy()
+        if self.root.winfo_exists():
+            self.root.destroy()
         self.root.destroy()
 
     def ask_to_kill(self):
@@ -111,7 +111,8 @@ class GPT:
         else:
             logging.warning("Mode %s not implemented yet.", self.gui.mode_chosen)
             self.gui.output_text.delete(1.0, tk.END)
-            self.gui.output_text.insert("end", f"Mode '{self.gui.mode_chosen}' not implemented yet.")
+            self.gui.output_text.insert("end", f"Mode \
+                                        '{self.gui.mode_chosen}' not implemented yet.")
         logging.info("Generation process completed.")
 
     def stop_generation(self):
