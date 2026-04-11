@@ -36,14 +36,17 @@ class GUI:
         # buttons (command set later to avoid circular dependency)
         self.button_frame = tk.Frame(self.root)
         self.status_var = tk.StringVar(value="Ready")
-        # Use a fixed-width label so updating status text doesn't shift buttons
-        self.status_label = tk.Label(self.button_frame, textvariable=self.status_var, width=12, anchor="w")
-        self.status_label.pack(side="left", padx=6)
-        self.generate_button = tk.Button(self.button_frame, text="Generate", command=None)
+        # Let the status label expand while keeping buttons fixed on the right
+        self.status_label = tk.Label(self.button_frame, textvariable=self.status_var, anchor="w")
+        self.status_label.pack(side="left", fill="x", expand=True, padx=6)
+        # Right-side container for buttons so they don't move when status changes
+        self.buttons_right = tk.Frame(self.button_frame)
+        self.generate_button = tk.Button(self.buttons_right, text="Generate", command=None)
         self.generate_button.pack(side="left", padx=6)
-        self.stop_button = tk.Button(self.button_frame, text="Stop", command=None)
+        self.stop_button = tk.Button(self.buttons_right, text="Stop", command=None)
         self.stop_button.pack(side="left", padx=6)
-        self.button_frame.pack(pady=6)
+        self.buttons_right.pack(side="right")
+        self.button_frame.pack(fill="x", padx=6, pady=6)
 
         # key bindings: Enter -> generate, Escape -> stop
         self.root.bind("<Return>", lambda e: self.generate_button.invoke())
