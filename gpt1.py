@@ -114,6 +114,7 @@ class GPT1Streamer:
 
         if self.gui:
             self.gui.status_var.set("GPT-1 Generation Finished")
+            self.gui.output_text.insert("end", "\n--- Other Model Generation Finished ---\n")
         else:
             print("\n--- GPT-1 Generation Finished ---")
 
