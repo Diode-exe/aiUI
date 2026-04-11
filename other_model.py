@@ -8,6 +8,11 @@ class OtherModelStreamer:
         self.model_name = model_name
         self.tokenizer = None
         self.model = None
+        self.auto_model_cls = None
+        self.auto_tokenizer_cls = None
+        self.text_iterator_streamer_cls = None
+        self.stopping_criteria_cls = None
+        self.stopping_criteria_list_cls = None
         self.stop_requested = False
         self._stop_criteria = None
         self.model_dir = "other_model_local"
@@ -29,43 +34,52 @@ class OtherModelStreamer:
 
         self.gui.root.after(0, _append)
 
-    def run_other_model_streamed(self, prompt, max_length=250):
-        """Run other model with streaming output."""
-        # Import heavy transformer classes lazily to avoid import-time failures
+    def _import_transformers(self):
+        """Import transformer classes lazily and cache the symbols used by this streamer."""
         try:
             from transformers import AutoModelForCausalLM
-        except Exception:
+        except ImportError:
             try:
                 # older transformers exposed AutoModelWithLMHead
                 from transformers import AutoModelWithLMHead as AutoModelForCausalLM
-            except Exception:
+            except ImportError:
                 AutoModelForCausalLM = None
+
         try:
             from transformers import AutoTokenizer, TextIteratorStreamer
             from transformers import StoppingCriteria, StoppingCriteriaList
-        except Exception as e:
+        except ImportError as e:
             raise ImportError(
                 "Required classes not available from transformers. "
                 "Try upgrading with `pip install -U transformers`."
             ) from e
+
+        self.auto_model_cls = AutoModelForCausalLM
+        self.auto_tokenizer_cls = AutoTokenizer
+        self.text_iterator_streamer_cls = TextIteratorStreamer
+        self.stopping_criteria_cls = StoppingCriteria
+        self.stopping_criteria_list_cls = StoppingCriteriaList
+
+    def load_model(self):
+        self._import_transformers()
         if os.path.exists(self.model_dir) and \
         os.path.exists(os.path.join(self.model_dir, "config.json")):
             logging.info("Loading Other Model from local disk...")
             if self.gui:
                 self.gui.status_var.set("Loading Other Model from local disk...")
-            self.tokenizer = AutoTokenizer.from_pretrained(self.model_dir)
-            self.model = AutoModelForCausalLM.from_pretrained(self.model_dir)
+            self.tokenizer = self.auto_tokenizer_cls.from_pretrained(self.model_dir)
+            self.model = self.auto_model_cls.from_pretrained(self.model_dir)
         else:
             logging.info("Local model not found. Downloading from Hugging Face...")
             if self.gui:
                 self.gui.status_var.set("Downloading Other Model from Hugging Face...")
-            self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
-            if AutoModelForCausalLM is None:
+            self.tokenizer = self.auto_tokenizer_cls.from_pretrained(self.model_name)
+            if self.auto_model_cls is None:
                 raise ImportError(
                     "transformers does not provide AutoModelForCausalLM or a compatible fallback. "
                     "Please upgrade your `transformers` package: `pip install -U transformers`"
                 )
-            self.model = AutoModelForCausalLM.from_pretrained(self.model_name)
+            self.model = self.auto_model_cls.from_pretrained(self.model_name)
 
             # Create directory if it doesn't exist
             os.makedirs(self.model_dir, exist_ok=True)
@@ -75,6 +89,19 @@ class OtherModelStreamer:
             self.tokenizer.save_pretrained(self.model_dir)
             logging.info("Model and tokenizer saved to %s", self.model_dir)
 
+    def run_other_model_streamed(self, prompt, max_length=250):
+        """Run other model with streaming output."""
+        # Import heavy transformer classes lazily to avoid import-time failures
+        if (
+            self.text_iterator_streamer_cls is None
+            or self.stopping_criteria_cls is None
+            or self.stopping_criteria_list_cls is None
+        ):
+            self._import_transformers()
+
+        if not self.model or not self.tokenizer:
+            self.load_model()
+
         # reset stop flag for this run
         self.stop_requested = False
 
@@ -82,17 +109,21 @@ class OtherModelStreamer:
 
         # 1. Initialize the streamer
         # skip_prompt=True ensures we only print the NEW stuff
-        streamer = TextIteratorStreamer(self.tokenizer, skip_prompt=True, skip_special_tokens=True)
+        streamer = self.text_iterator_streamer_cls(
+            self.tokenizer,
+            skip_prompt=True,
+            skip_special_tokens=True,
+        )
 
         # 2. Define a stopping criteria that can be triggered externally
-        class _StreamStopCriteria(StoppingCriteria):
+        class _StreamStopCriteria(self.stopping_criteria_cls):
             def __init__(self, parent):
                 self.parent = parent
 
             def __call__(self, input_ids, scores, **kwargs):
                 return getattr(self.parent, "stop_requested", False)
 
-        self._stop_criteria = StoppingCriteriaList([_StreamStopCriteria(self)])
+        self._stop_criteria = self.stopping_criteria_list_cls([_StreamStopCriteria(self)])
 
         # generation arguments
         generation_kwargs = {
@@ -128,9 +159,11 @@ class OtherModelStreamer:
 
         if self.gui:
             self.gui.status_var.set("Other Model Generation Finished")
+            self.gui.output_text.insert("end", "\n--- Other Model Generation Finished ---\n")
         else:
             print("\n--- Other Model Generation Finished ---")
 
     def request_stop(self):
-            """Request that the running generation stop as soon as the model checks criteria."""
-            self.stop_requested = True
+        """Request that the running generation stop as soon as the model checks criteria."""
+        self.stop_requested = True
+        self.stop_requested = True
